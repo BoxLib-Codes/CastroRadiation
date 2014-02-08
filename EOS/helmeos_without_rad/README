@@ -1,0 +1,6 @@
+Differences between helmeos_without_rad and helmeos
+
+In helmeos.f90, ssol (i.e., sigma) is set to zero.  Thus radiation is taken out. 
+
+In eos_stuff.f90, subroutine eos_get_cv is added.
+

@@ -1,0 +1,3 @@
+f90EXE_sources += eos_stuff.f90 
+f90EXE_sources += eosmodule.f90 readtable.f90 nuc_eos.f90 bisection.f90 findrho.f90 findtemp.f90 linterp_many.f90
+fEXE_sources += linterp.f
