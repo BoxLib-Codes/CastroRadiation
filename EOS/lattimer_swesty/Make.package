@@ -1,3 +1,0 @@
-f90EXE_sources += eos_stuff.f90
-fEXE_sources += eos.f
-fEXE_sources += lseos_v2.7.f
