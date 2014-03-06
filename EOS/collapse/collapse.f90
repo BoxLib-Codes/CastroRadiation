@@ -48,7 +48,6 @@ subroutine collapse_init
 
   use bl_error_module
   use parallel
-! use eos_module
 
   implicit none
 
@@ -165,8 +164,6 @@ end subroutine get_numel
 !----------------------------------------------------------------------
 
 subroutine findthis (f,nelem,temp,rho,ye,jy_out,jq_out,jr_out,input,pt_index)
-
-! use eos_module
 
   implicit none
 
