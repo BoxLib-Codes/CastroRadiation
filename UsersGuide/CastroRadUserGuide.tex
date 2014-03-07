@@ -87,17 +87,14 @@ edit the file {\tt GNUmakefile}, and set
 \begin{itemize}
 \item {\tt COMP} = your favorite C++ compiler (e.g., g++)
 \item {\tt FCOMP} = your favorite Fortran compiler (e.g., gfortran)
-\item {\tt USE\_HYPRE} = {\tt TRUE}
-\item {\tt USE\_RAD}   = {\tt TRUE}
-\item {\tt RAD\_INTERP}   = {\tt TRUE}
 \item {\tt DIM}   = 1 or 2 or 3
 \end{itemize}
 Then type {\tt make} to generate an executable file.  
 
 \section{EOS, Network, and Opacity}
 
-\paragraph{EOS} CASTRO provides two types of equation of state (EOS):
-gamma-law and Helmholtz.  To use the gamma-law EOS, set 
+\paragraph{EOS} CASTRO provides several types of equation of state
+(EOS), including gamma-law and Helmholtz.  To use the gamma-law EOS, set 
 \vspace{5pt}
 
 \verb|EOS_dir := gamma_law_general|\\[5pt]
@@ -105,17 +102,15 @@ in the {\tt GNUmakefile}.  The original Helmholtz EOS includes
 radiation contribution.  However, for radiation hydrodynamics
 calculations, the radition contribution should be taken out of EOS
 because radiation has been treated in other places.  To use Helmholtz
-EOS, set \vspace{5pt}
+EOS, do NOT set \verb|EOS_dir| to {\tt helmeos}.  Instead \vspace{5pt}
 
 \verb|EOS_dir := helmeos_without_rad|\\[5pt]
-and do NOT set \verb|EOS_dir| to {\tt helmeos}.  If you have your own
-EOS, you can put it in either {\tt\seqsplit{CASTRO/Parallel/Castro/EOS}} or
-{\tt\seqsplit{CASTRO\_RAD/Castro\_radiation/EOS}}
+should be set.  If you have your own
+EOS, you can put it in {\tt\seqsplit{CastroRadiation/EOS}}.
 
-\paragraph{Network} Some netwroks are included in the source code.  If
-you have your own network, you can put it in either
-{\tt\seqsplit{Castro/Networks}} or
-{\tt\seqsplit{CASTRO\_RAD/Castro\_radiation/Networks}}.
+\paragraph{Network} Several netwroks are included in the source code.  If
+you have your own network, you can put it in
+{\tt\seqsplit{CastroRadiation/Networks}}.
 
 \paragraph{Opacity} By default, we assume that
 \begin{equation}
@@ -128,8 +123,8 @@ $p = 0$.  If Equation~(\ref{eq:kappa}) is sufficient, set \vspace{5pt}
 
 \verb|Opacity_dir := null|\\[5pt]
 in {\tt GNUmakefile}.  Otherwise, put your own opacity in
-{\tt\seqsplit{CASTRO\_RAD/Castro\_radiation/Opacity}} and set
-the input parameter, {\tt radiation.use\_opacity\_table\_module} (see
+{\tt\seqsplit{CastroRadiation/Opacity}} and set
+the input parameter, {\tt radiation.use\_opacity\_table\_module = 1} (see
 \S~\ref{sec:opacpars}). 
 
 \section{Input Parameters}
@@ -185,7 +180,7 @@ on the right-hand side of the equal sign.
 
 \begin{description}
 \item[radiation.use\_opacity\_table\_module = 0] \hfill \\
-  For neutrino provides, this parameter is not used.  For photon
+  For neutrino problems, this parameter is not ignored.  For photon
   problems, this determines whether the opacity module at {\tt
     Opacity\_dir} (which is set in {\tt GNUmakefile}) will be used to
   compute opacities.  If this is set to 1, the following parameters
@@ -249,13 +244,29 @@ equation. They do not affect hydro boundaries.
   Possible values are:
   \begin{itemize}
     \item 101: Dirchlet
-    \item 102: Reflect
-    \item 103: Neumann
+    \item 102: Neumann
     \item 104: Marshak (vacuum) 
     \item 105: Sanchez-Pomraning (modified Marshak that works with FLD)
   \end{itemize}
 \item[radiation.hi\_bc] \hfill \\
   See {\tt radiation.lo\_bc}.
+\item[radiation.lo\_bcflag = 0 0 0] \hfill \\
+  If it is 0, {\tt bcval} is used for that dimension, otherwise 
+  subroutine {\tt rbndry} in {\tt RadBndry\_1d.f90} is called to set
+  boundary conditions.
+\item[radiation.hi\_bcflag = 0 0 0] \hfill \\
+  See {\tt radiation.lo\_bcflag}
+\item[radiation.lo\_bcval = 0.0 0.0 0.0] \hfill \\
+  This parameter is interpreted differently depending on the boundary
+  condition:
+  \begin{itemize}
+    \item Dirchlet: Dirichlet value of rad energy density
+    \item Neumann:  inward flux of rad energy
+    \item Marshak:  incident flux
+    \item Sanchez-Pomraning: incident flux
+  \end{itemize}
+\item[radiation.hi\_bcval = 0.0 0.0 0.0] \hfill \\
+  See {\tt radiation.lo\_bcval}
 \end{description}
 
 \subsection{Convergence}
@@ -265,8 +276,7 @@ whereas for the MG solver, there are two iterations with an inner
 iteration embedded inside an outer iteration.  In the following, the
 iteration in the gray solver will also be referred as the outer
 iteration for convenience.  The parameters for the inner iteration are
-irrelevant to the gray solver.  However, the inner iteration is used
-for a gray problem solved by the MG solver.  
+irrelevant to the gray solver.  
 
 \begin{description}
 \item[radiation.maxiter = 50] \hfill \\
@@ -341,13 +351,6 @@ method.  However, when we compute the group-integrated Planck
 function, the lower bound for the first group and the upper bound for
 the last group are assumed to be 0 and $\infty$, respectively.
 
-The MG solver can also be used to solve gray problems, if you set {\tt
-  radiation.nGroups = 1}.  In that case, you do not need to set other
-grouping parameters and the frequency range will be assumed to be $[0,
-\infty]$. It should be noted that the MG solver is not as efficient as
-the real gray solver for most gray problems, because it uses more
-iterations.
-
 \subsection{Parameters for MG Solver}
 \label{sec:mgpar}
 
@@ -419,9 +422,6 @@ is best for your problem and computer.
 \item[radsolve.level\_solver\_flag] \hfill \\
   Setting this to 109 (GMRES using Struct SMG/PFMG as preconditioner)
   should work reasonably well for most problems. 
-\item[hmabec.struct\_flag] \hfill \\
-  This parameter is for {\tt level\_solver\_flag} = 109. Set this to 0
-  (SMG) for 1D, 1 (PFMG) for multi-D.
 \item[radsolve.maxiter = 40] \hfill \\
   Maximal number of iteration in Hypre.
 \item[radsolve.reltol = 1.e-10] \hfill \\
