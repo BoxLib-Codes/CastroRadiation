@@ -52,10 +52,10 @@ contains
 end module opacity_table_module
 
 
-  subroutine init_opacity_table(iverb)
-
-    implicit none
-    integer iverb
-        
-  end subroutine init_opacity_table
+subroutine init_opacity_table(iverb)
+  
+  implicit none
+  integer iverb
+  
+end subroutine init_opacity_table
 
