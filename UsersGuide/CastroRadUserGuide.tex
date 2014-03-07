@@ -24,15 +24,13 @@
 \section{Introduction}
 
 In this User's Guide we will describe how to use the CASTRO radiation
-module.  Several radiation solvers have been developed.  Here we will
-describe two solvers: a gray rdiation hydrodynamics solver and a
-multigroup (MG) radiation hydrodynamics solver.  Both solvers adopt
-the flux-limited diffusion (FLD) approximation.  The gray solver has a
-comoving frame mode and a mixed frame mode, whereas the MG solver uses
-the comoving frame approach.  The MG solver can also be used to solve
-gray problems.  More details about the formulation and
-algorithm can be found in the seriers of CASTRO papers and the CASTRO
-User's Guide.
+module.  We will describe two radiation solvers: a gray rdiation
+hydrodynamics solver and a multigroup (MG) radiation hydrodynamics
+solver.  Both solvers adopt the flux-limited diffusion (FLD)
+approximation.  The gray solver has a comoving frame mode and a mixed
+frame mode, whereas the MG solver uses the comoving frame approach.
+More details about the formulation and algorithm can be found in the
+seriers of CASTRO papers and the CASTRO User's Guide.
 
 \section{Getting Started}
 
@@ -54,15 +52,11 @@ where {\tt XXX} should be replaced with your user name on battra.  You
 can update it regularly by typing \verb|git pull| in the Castro
 directory.
 
-\paragraph{CASTRO\_RAD} You need to be in the group {\tt Castro\_radiation}
-on {\tt battra.lbl.gov} to have access to CASTRO\_RAD.  If not, contact Ann
-Almgren at {\tt ASAlmgren@lbl.gov}.  The environment variable
-\verb|CVS_RSH| should be set to \verb|ssh|.  You can set
-\verb|CVS_RSH| by typing \verb|export CVS_RSH=ssh| if you use bash. To
-download CASTRO\_RAD, you type \vspace{5pt}
+\paragraph{CastroRadiation} You can download CastroRadiation via git by typing
+\vspace{5pt}
 
-\verb|cvs -d :ext:XXX@battra.lbl.gov:/home/ccse_src/cvsroot co CASTRO_RAD|\\[5pt]
-where {\tt XXX} should be replaced with your user name on battra.
+\verb|git clone XXX@battra.lbl.gov:/home/ccse_src/gitroot/CastroRadiation.git|\\[5pt]
+where {\tt XXX} should be replaced with your user name on battra.  
 
 \paragraph{Hypre} CASTRO radiation solvers use Hypre
 (\url{https://computation.llnl.gov/casc/linear_solvers/sls_hypre.html})
@@ -74,21 +68,21 @@ machine.
 You need to modify:
 \begin{itemize}
 \item the variable {\tt BOXLIB\_HOME} in the file
-  {\tt\seqsplit{CASTRO/Parallel/Castro/Exec/Make.Castro}} to the
+  {\tt\seqsplit{Castro/Exec/Make.Castro}} to the
   directory for BoxLib (e.g., {\tt\seqsplit{/home/J.Doe/BoxLib}})
 \item the variable {\tt CASTRO\_DIR} in the file
-  {\tt\seqsplit{CASTRO\_RAD/Castro\_radiation/Exec/Make.Castro}} to
+  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}} to
   the Castro directory
-  (e.g., {\tt\seqsplit{/home/J.Doe/CASTRO/Parallel/Castro}})
+  (e.g., {\tt\seqsplit{/home/J.Doe/Castro}})
 \item the variable {\tt HYPRE\_DIR} in the file
-  {\tt\seqsplit{CASTRO\_RAD/Castro\_radiation/Exec/Make.Castro}} to
+  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}} to
   the directory for Hypre (e.g., {\tt\seqsplit{/home/J.Doe/hypre}})
 \end{itemize}
 or you can set them as environment variables of your shell.  \\
 
 
 Now go to a ``run'' directory, say
-{\tt\seqsplit{CASTRO\_RAD/Castro\_radiation/Exec/RadThermalWave}},
+{\tt\seqsplit{CastroRadiation/Exec/RadThermalWave}},
 edit the file {\tt GNUmakefile}, and set
 \begin{itemize}
 \item {\tt COMP} = your favorite C++ compiler (e.g., g++)
