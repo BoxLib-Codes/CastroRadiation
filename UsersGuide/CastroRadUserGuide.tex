@@ -76,6 +76,11 @@ You need to modify:
 \item the variable {\tt HYPRE\_DIR} in the file
   {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}} to
   the directory for Hypre (e.g., {\tt\seqsplit{/home/J.Doe/hypre}})
+  if you build with {\tt USE\_OMP=FALSE}
+\item the variable {\tt HYPRE\_OMP\_DIR} in the file
+  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}} to
+  the directory for openmp enabled Hypre (e.g., {\tt\seqsplit{/home/J.Doe/hypre-omp}})
+  if you build with {\tt USE\_OMP=TRUE}
 \end{itemize}
 or you can set them as environment variables of your shell.  \\
 
