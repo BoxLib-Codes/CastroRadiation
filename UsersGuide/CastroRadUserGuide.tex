@@ -95,41 +95,80 @@ edit the file {\tt GNUmakefile}, and set
 \end{itemize}
 Then type {\tt make} to generate an executable file.  
 
-\section{EOS, Network, and Opacity}
+\section{Microphysics: EOS, Network, and Opacity}
 
-\paragraph{EOS} CASTRO provides several types of equation of state
-(EOS), including gamma-law and Helmholtz.  To use the gamma-law EOS, set 
-\vspace{5pt}
+\subsection{EOS}
 
-\verb|EOS_dir := gamma_law_general|\\[5pt]
-in the {\tt GNUmakefile}.  The original Helmholtz EOS includes
-radiation contribution.  However, for radiation hydrodynamics
-calculations, the radition contribution should be taken out of EOS
-because radiation has been treated in other places.  To use Helmholtz
-EOS, do NOT set \verb|EOS_dir| to {\tt helmeos}.  Instead \vspace{5pt}
+CASTRO provides several types of equation of state (EOS), including
+gamma-law and Helmholtz.  To use the gamma-law EOS, set
+\begin{verbatim}
+EOS_dir := gamma_law_general
+\end{verbatim}
+in the {\tt GNUmakefile}.
 
-\verb|EOS_dir := helmeos_without_rad|\\[5pt]
-should be set.  If you have your own
-EOS, you can put it in {\tt\seqsplit{CastroRadiation/EOS}}.
+The original Helmholtz EOS for stellar interiors includes a radiation
+contribution.  However, for radiation hydrodynamics calculations, the
+radition contribution should be taken out of EOS because radiation has
+been treated in other places.  To use Helmholtz EOS, do NOT set {\tt
+  EOS\_dir} to {\tt helmeos}.  Instead 
+\begin{verbatim}
+EOS_dir := helmeos_without_rad
+\end{verbatim}
+should be set.  If you have your own EOS, you can put it in
+{\tt\seqsplit{CastroRadiation/EOS}}.
 
-\paragraph{Network} Several netwroks are included in the source code.  If
-you have your own network, you can put it in
+\subsection{Network}
+
+Several netwroks are included in the source code.  If you have your
+own network, you can put it in
 {\tt\seqsplit{CastroRadiation/Networks}}.
 
-\paragraph{Opacity} By default, we assume that
+If you are not modeling reactions, then the {\tt general\_null}
+network can be used to define the appropriate composition for
+your problem.
+
+\subsection{Opacity}
+
+By default, we assume that
 \begin{equation}
   \kappa = \mathrm{const}\ \rho^{m} T^{-n} \nu^{p} , \label{eq:kappa}
 \end{equation}
 where $\kappa$ is either Planck or Rosseland mean absorption
 coefficients, $\rho$ is density, $T$ is temperature, $\nu$ is
 frequency, and $m$, $n$ and $p$ are constants.  For the gray solver,
-$p = 0$.  If Equation~(\ref{eq:kappa}) is sufficient, set \vspace{5pt}
-
-\verb|Opacity_dir := null|\\[5pt]
+$p = 0$.  If Equation~(\ref{eq:kappa}) is sufficient, set
+\begin{verbatim}
+Opacity_dir := null
+\end{verbatim}
 in {\tt GNUmakefile}.  Otherwise, put your own opacity in
 {\tt\seqsplit{CastroRadiation/Opacity}} and set
 the input parameter, {\tt radiation.use\_opacity\_table\_module = 1} (see
 \S~\ref{sec:opacpars}). 
+
+Some notes:
+\begin{itemize}
+\item Here, $\kappa$ has units of $\mathrm{cm}^{-1}$.  Some papers or
+  texts may instead have an implicit density factor in $\kappa$,
+  yielding units $\mathrm{cm}^2 \mathrm{g}^{-1}$.
+
+\item Castro allows for two temperatures (different radiation and gas
+  temperature, so $E_\mathrm{r} \ne a T_\mathrm{gas}^4$.
+  Correspondingly, Castro cares about both the Planck mean,
+  $\kappa_F$, and Rosseland mean, $\kappa_R$, opacities---these have
+  different weightings.
+  
+  If we set $\kappa_F \Delta x \gg 1$ ($\kappa_F$ is really large),
+  then the two temperatures become the same.
+
+  If we set $\kappa_F = \kappa_R$, then we can see how different the
+  two temperature are.
+
+  In an optically thick medium, we would not expect the two temperatures
+  to be very different.
+
+\end{itemize}
+  
+  
 
 \section{Input Parameters}
 
@@ -242,15 +281,55 @@ the total opacity is the sum of {\tt kappa\_p} and {\tt scattering}.
 \subsection{Boundary}
 
 The following parameters are for radiation boundary in the diffusion
-equation. They do not affect hydro boundaries. 
+equation. They do not affect hydrodynamic boundaries. 
 \begin{description}
 \item[radiation.lo\_bc] \hfill \\
   Possible values are:
   \begin{itemize}
-    \item 101: Dirchlet
+  \item 101: Dirchlet
+    Specify the radiation energy density on the boundary.
+
+    For gray radiation, this could be $E_r = a T^4$.
+
+    For multigroup radiation, Castro stores the energy density as
+    $\mathrm{erg} \mathrm{cm}^{-3}$, so the total radiation energy
+    can be found by simply summing over the groups.  So if you want
+    to set the radiation BCs using the Planck function, you simply
+    multiply by the group width---see {\tt Exec/RadSphere/Tools/radbc.f90}
+    for an example.
+        
     \item 102: Neumann
-    \item 104: Marshak (vacuum) 
+
+      Here, you specify the radiation flux on the boundary.  For gray
+      radiation, this is the expression given in the gray Castro paper
+      (Eq. 7, 8),
+      \begin{equation}
+        F_r = - \frac{c\lambda}{\kappa_R} \nabla E_r
+      \end{equation}
+      where $\lambda$ is the flux limiter.
+
+      Note that if your boundary represents an incoming flux through
+      a vacuum (like stellar irradiation), then $\lambda \rightarrow 0$
+      and $\kappa \rightarrow 0$, leaving
+      \begin{equation}
+        F_r = -c\nabla E_r
+      \end{equation}
+      in that case.
+      
+
+    \item 104: Marshak (vacuum)
+
+      Here, you specify the
+      incident flux and the outside is a vacuum.  This differs from the
+      Neumann condition because there is also a flux coming from inside,
+      for the net flux across the boundary is different than the incident
+      flux.
+      
     \item 105: Sanchez-Pomraning (modified Marshak that works with FLD)
+
+      This is like the Marshak condition, but $\lambda = 1/3$ is assumed inside
+      the boundary (optical thickness).
+      
   \end{itemize}
 \item[radiation.hi\_bc] \hfill \\
   See {\tt radiation.lo\_bc}.
