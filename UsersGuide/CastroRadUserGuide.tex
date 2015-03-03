@@ -149,7 +149,7 @@ Some notes:
 \begin{itemize}
 \item Here, $\kappa$ has units of $\mathrm{cm}^{-1}$.  Some papers or
   texts may instead have an implicit density factor in $\kappa$,
-  yielding units $\mathrm{cm}^2 \mathrm{g}^{-1}$.
+  yielding units $\mathrm{cm}^2~\mathrm{g}^{-1}$.
 
 \item Castro allows for two temperatures (different radiation and gas
   temperature, so $E_\mathrm{r} \ne a T_\mathrm{gas}^4$.
@@ -292,7 +292,7 @@ equation. They do not affect hydrodynamic boundaries.
     For gray radiation, this could be $E_r = a T^4$.
 
     For multigroup radiation, Castro stores the energy density as
-    $\mathrm{erg} \mathrm{cm}^{-3}$, so the total radiation energy
+    $\mathrm{erg}~\mathrm{cm}^{-3}$, so the total radiation energy
     can be found by simply summing over the groups.  So if you want
     to set the radiation BCs using the Planck function, you simply
     multiply by the group width---see {\tt Exec/RadSphere/Tools/radbc.f90}
@@ -312,9 +312,9 @@ equation. They do not affect hydrodynamic boundaries.
       a vacuum (like stellar irradiation), then $\lambda \rightarrow 0$
       and $\kappa \rightarrow 0$, leaving
       \begin{equation}
-        F_r = -c\nabla E_r
+        F_r = -c E_r
       \end{equation}
-      in that case.
+      in that case.  ({\color{red} What about the ``$-$''?})
       
 
     \item 104: Marshak (vacuum)
