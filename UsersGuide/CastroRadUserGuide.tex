@@ -12,6 +12,7 @@
 \newcommand{\tensor}[1]{\mbox{\boldmath{\ensuremath{\mathsf{#1}}}}}
 
 \newcommand{\castro}{{\sf Castro}}
+\newcommand{\boxlib}{{\sf BoxLib}}
 
 % make the MarginPars look pretty
 \setlength{\marginparwidth}{0.75in}
@@ -20,49 +21,60 @@
 
 \begin{document}
 
-\title{CASTRO Radiation User's Guide}
+\title{\castro\ Radiation User's Guide}
 \maketitle
 
 \section{Introduction}
 
-In this User's Guide we will describe how to use the CASTRO radiation
+In this User's Guide we will describe how to use the \castro\ radiation
 module.  We will describe two radiation solvers: a gray rdiation
 hydrodynamics solver and a multigroup (MG) radiation hydrodynamics
 solver.  Both solvers adopt the flux-limited diffusion (FLD)
 approximation.  The gray solver has a comoving frame mode and a mixed
 frame mode, whereas the MG solver uses the comoving frame approach.
 More details about the formulation and algorithm can be found in the
-seriers of CASTRO papers and the CASTRO User's Guide.
+seriers of \castro\ papers and the \castro\ User's Guide.
 
 \section{Getting Started}
 
 \subsection{Getting the Code}
 
-\paragraph{BoxLib} BoxLib is distributed via git.  You can download it
-by typing
-\vspace{5pt}
+The \castro\ radiation solver is a module for the \castro\ hydrodynamics code,
+and both of these depend on the \boxlib\ library.  These pieces are
+distributed via separate git repositories.  To get all the required code,
+do the following:
 
-\verb|git clone https://ccse.lbl.gov/pub/Downloads/BoxLib.git|\\[5pt]
-and update it regularly by typing \verb|git pull| in the BoxLib
+\begin{itemize}
+
+\item \boxlib: \boxlib\ is distributed via git.  You can download it
+  by typing:
+\begin{verbatim}
+git clone https://ccse.lbl.gov/pub/Downloads/BoxLib.git
+\end{verbatim}
+and update it regularly by typing {\tt git pull} in the {\tt BoxLib/}
 directory.
 
-\paragraph{CASTRO} You can download CASTRO via git by typing the
-following command.
-\vspace{5pt}
+\item \castro: You can download \castro\ via git by typing the
+  following command:
+\begin{verbatim}
+git clone https://github.com/BoxLib-Codes/Castro
+\end{verbatim}
+You should update it regularly by typing {\tt git pull} in the {\tt
+  Castro/} directory.
 
-\verb|git clone https://github.com/BoxLib-Codes/Castro|\\[5pt] You can
-update it regularly by typing \verb|git pull| in the Castro directory.
+\item {\tt CastroRadiation}: 
+You can download {\tt CastroRadiation} via git by typing the following
+command.
+\begin{verbatim}
+git clone https://github.com/BoxLib-Codes/CastroRadiation
+\end{verbatim}
 
-\paragraph{CastroRadiation} You can download CastroRadiation via git
-by typing the following command.
-\vspace{5pt}
-
-\verb|git clone https://github.com/BoxLib-Codes/CastroRadiation|
-
-\paragraph{Hypre} CASTRO radiation solvers use Hypre
+\item {\tt Hypre}:
+\castro\ radiation solvers use Hypre
 (\url{https://computation.llnl.gov/casc/linear_solvers/sls_hypre.html})
 for solving linear systems.  So you need to install Hypre on your
 machine.
+\end{itemize}
 
 \subsection{Building the Code}
 
@@ -101,7 +113,7 @@ Then type {\tt make} to generate an executable file.
 
 \subsection{EOS}
 
-CASTRO provides several types of equation of state (EOS), including
+\castro\ provides several types of equation of state (EOS), including
 gamma-law and Helmholtz.  To use the gamma-law EOS, set
 \begin{verbatim}
 EOS_dir := gamma_law_general
@@ -171,70 +183,7 @@ Some notes:
 \end{itemize}
 
 
-
-\section{Input Parameters}
-
-In this section, we list some radiation related parameters that you
-can set in an ``inputs'' file.  Here are some important parameters:
-\begin{description}
-\item {\tt radiation.SolverType}:
-
-  Set it to 5 for the gray solver, and 6 for the MG solver.
-
-\item {\tt castro.do\_hydro}
-
-  Usually you want to set it to 1.  If it is set to 0, hydro will be
-  turned off, and the calculation will only solve radiation diffusion
-  equation.
-
-\item {\tt castro.do\_radiation}
-
-  If it is 0, the calculation will be pure hydro.
-\end{description}
-
-Below are more parameters.  For each parameter, the default value is
-on the right-hand side of the equal sign.
-
-\subsection{Flux Limiter and Closure}
-
-\begin{itemize}
-
-\item {\tt radiation.limiter = 2}
-
-  Possible values are:
-  \begin{itemize}
-  \item {\tt ~0}: No flux limiter
-
-  \item {\tt ~2}: Approximate limiter of Levermore \& Pomraning
-
-  \item {\tt 12}: Bruenn's limiter
-
-  \item {\tt 22}: Larsen's square root limiter
-
-  \item {\tt 32}: Minerbo's limiter
-  \end{itemize}
-
-\item {\tt radiation.closure = 3}
-
-  Possible values are:
-  \begin{itemize}
-  \item {\tt 0}: $f = \lambda$, where $f$ is the scalar Eddington factor
-    and $\lambda$ is the flux limiter.
-
-  \item {\tt 1}: $f = \frac{1}{3}$
-  \item {\tt 2}: $f = 1 - 2 \lambda$
-  \item {\tt 3}: $f = \lambda + (\lambda R)^2$, where $R$ is the radiation
-    Knudsen number.
-  \item {\tt 4}: $f = \frac{1}{3} + \frac{2}{3} (\frac{F}{cE})^2$, where
-      $F$ is the radiation flux, $E$ is the radiation energy density,
-      and $c$ is the speed of light.
-  \end{itemize}
-% \item[\ \ \ radiation.surface\_average = 2] \hfill \\
-%   In the discretization of the diffusion equation, the diffusion
-%   coefficients live on cell surfaces.  Thus averaging .....
-\end{itemize}
-
-\subsection{Opacity}
+\subsubsection{Opacity Parameters}
 \label{sec:opacpars}
 
 The parameters describing the opacity include:
@@ -295,6 +244,87 @@ of {\tt kappa\_r} and {\tt scattering}, whereas for the MG solver,
 there are two possibilities.  If {\tt const\_kappa\_r} is greater than
 0, then the total opacity is set by {\tt kappa\_r} alone, otherwise
 the total opacity is the sum of {\tt kappa\_p} and {\tt scattering}.
+
+
+
+\section{Radiation Solver Physics}
+
+In this section, we list some radiation related parameters that you
+can set in an ``inputs'' file.  Here are some important parameters:
+\begin{description}
+\item {\tt radiation.SolverType}:
+
+  Set it to 5 for the gray solver, and 6 for the MG solver.
+
+\item {\tt castro.do\_hydro}
+
+  Usually you want to set it to 1.  If it is set to 0, hydro will be
+  turned off, and the calculation will only solve radiation diffusion
+  equation.
+
+\item {\tt castro.do\_radiation}
+
+  If it is 0, the calculation will be pure hydro.
+\end{description}
+
+Below are more parameters.  For each parameter, the default value is
+on the right-hand side of the equal sign.
+
+
+\subsection{Verbosity and I/O}
+\label{sec:bothpar}
+
+\begin{description}
+\item[radiation.v = 0] \hfill \\
+  Verbosity
+\item[radiation.verbose = 0] \hfill \\
+  Verbosity
+\item[radiation.Test\_Type\_lambda = 0] \hfill \\
+  The gray solver only.  If 1, save flux limiter.
+\item[radiation.Test\_Type\_Flux = 0] \hfill \\
+  If 1, save the total radiation flux.
+\end{description}
+
+
+\subsection{Flux Limiter and Closure}
+
+\begin{itemize}
+
+\item {\tt radiation.limiter = 2}
+
+  Possible values are:
+  \begin{itemize}
+  \item {\tt ~0}: No flux limiter
+
+  \item {\tt ~2}: Approximate limiter of Levermore \& Pomraning
+
+  \item {\tt 12}: Bruenn's limiter
+
+  \item {\tt 22}: Larsen's square root limiter
+
+  \item {\tt 32}: Minerbo's limiter
+  \end{itemize}
+
+\item {\tt radiation.closure = 3}
+
+  Possible values are:
+  \begin{itemize}
+  \item {\tt 0}: $f = \lambda$, where $f$ is the scalar Eddington factor
+    and $\lambda$ is the flux limiter.
+
+  \item {\tt 1}: $f = \frac{1}{3}$
+  \item {\tt 2}: $f = 1 - 2 \lambda$
+  \item {\tt 3}: $f = \lambda + (\lambda R)^2$, where $R$ is the radiation
+    Knudsen number.
+  \item {\tt 4}: $f = \frac{1}{3} + \frac{2}{3} (\frac{F}{cE})^2$, where
+      $F$ is the radiation flux, $E$ is the radiation energy density,
+      and $c$ is the speed of light.
+  \end{itemize}
+% \item[\ \ \ radiation.surface\_average = 2] \hfill \\
+%   In the discretization of the diffusion equation, the diffusion
+%   coefficients live on cell surfaces.  Thus averaging .....
+\end{itemize}
+
 
 \subsection{Boundary Conditions}
 
@@ -535,19 +565,6 @@ the last group are assumed to be 0 and $\infty$, respectively.
   kludge, it is justified to lag it.
 \end{description}
 
-\subsection{Verbosity and I/O}
-\label{sec:bothpar}
-
-\begin{description}
-\item[radiation.v = 0] \hfill \\
-  Verbosity
-\item[radiation.verbose = 0] \hfill \\
-  Verbosity
-\item[radiation.Test\_Type\_lambda = 0] \hfill \\
-  The gray solver only.  If 1, save flux limiter.
-\item[radiation.Test\_Type\_Flux = 0] \hfill \\
-  If 1, save the total radiation flux.
-\end{description}
 
 \subsection{Linear System Solver}
 \label{sec:hypre}
