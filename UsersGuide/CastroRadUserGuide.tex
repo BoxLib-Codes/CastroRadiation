@@ -11,6 +11,8 @@
 \renewcommand{\vec}[1]{\mbox{\boldmath$#1$}}
 \newcommand{\tensor}[1]{\mbox{\boldmath{\ensuremath{\mathsf{#1}}}}}
 
+\newcommand{\castro}{{\sf Castro}}
+
 % make the MarginPars look pretty
 \setlength{\marginparwidth}{0.75in}
 \newcommand{\MarginPar}[1]{\marginpar{\vskip-\baselineskip\raggedright\tiny\sffamily
@@ -264,21 +266,14 @@ The parameters describing the opacity include:
   \item {\tt radiation.kappa\_r\_exp\_p = 0.0}
   \end{itemize}
   
-\item {\tt radiation.const\_scattering = 0.0}
-  
-  The constant in Equation~(\ref{eq:kappa}) for scattering coefficient.
-
-\item{\tt radiation.scattering\_exp\_m = 0.0}
-  
-  The exponent $m$ in Equation~(\ref{eq:kappa}) for scattering coefficient.
-
-\item {\tt radiation.scattering\_exp\_n = 0.0}
-  
-  The exponent $n$ in Equation~(\ref{eq:kappa}) for scattering coefficient.
-
-\item {\tt radiation.scattering\_exp\_p = 0.0}
-  
-  The exponent $p$ in Equation~(\ref{eq:kappa}) for scattering coefficient.
+\item For the scattering coefficient of the form in Eq.~(\ref{eq:kappa}),
+  the following parameters set the coefficient and exponents:
+  \begin{itemize}
+  \item {\tt radiation.const\_scattering = 0.0}
+  \item {\tt radiation.scattering\_exp\_m = 0.0}
+  \item {\tt radiation.scattering\_exp\_n = 0.0}
+  \item {\tt radiation.scattering\_exp\_p = 0.0}
+  \end{itemize}
 
 \item {\tt radiation.kappa\_r\_floor = 0.0}
 
@@ -290,7 +285,7 @@ The parameters describing the opacity include:
   follows
   \begin{equation}
     \kappa = \mathrm{const}\ \rho^{m} T^{-n} \nu^{p}
-    [1-\exp{(-\frac{h\nu}{k T})}].
+    \left [1-\exp{\left (-\frac{h\nu}{k T} \right )} \right ].
   \end{equation}
 \end{itemize}
 
@@ -311,7 +306,7 @@ the hydrodynamics and radiation portions of the evolution.
 For the hydrodynamics portion of the solve, the boundary conditions
 for the normal hydrodynamic state values will be set by the problem's
 {\tt hypfill} routine (which typically just calls {\tt filcc} to handle
-the usual hydrodynamics boundary types (outflow, symmetry, etc.).
+the usual hydrodynamics boundary types: outflow, symmetry, etc.).
 
 A corresponding {\tt radfill} routine needs to be written to fill the
 ghost cells for the radiation energy density during the hydrodynamics
@@ -329,13 +324,16 @@ routine will not do a hydrodynamic {\tt Inflow} boundary.
 
 The following parameters are for radiation boundary in the diffusion
 equation. They do not affect hydrodynamic boundaries.
-\begin{description}
-\item[radiation.lo\_bc] \hfill \\
-  Possible values are:
+\begin{itemize}
+\item {\tt radiation.lo\_bc}
+  
+  This sets the action to take at the lower edge of the domain in
+  each coordinate direction.  Possible values are:
   \begin{itemize}
-  \item 101: Dirchlet
-    Specify the radiation energy density on the boundary.
 
+  \item {\tt 101} {\em Dirchlet}:
+
+    Specify the radiation energy density on the boundary.
     For gray radiation, this could be $E_r = a T^4$.
 
     For multigroup radiation, Castro stores the energy density as
@@ -345,59 +343,70 @@ equation. They do not affect hydrodynamic boundaries.
     multiply by the group width---see {\tt Exec/RadSphere/Tools/radbc.f90}
     for an example.
 
-    \item 102: Neumann
+  \item {\tt 102} {\em Neumann}:
 
-      Here, you specify the radiation flux on the boundary.  For gray
-      radiation, this is the expression given in the gray Castro paper
-      (Eq. 7, 8),
-      \begin{equation}
-        F_r = - \frac{c\lambda}{\kappa_R} \nabla E_r
-      \end{equation}
-      where $\lambda$ is the flux limiter.
+    Here, you specify the radiation flux on the boundary.  For gray
+    radiation, this is the expression given in the gray Castro paper
+    (Eq. 7, 8),
+    \begin{equation}
+      F_r = - \frac{c\lambda}{\kappa_R} \nabla E_r
+    \end{equation}
+    where $\lambda$ is the flux limiter.
 
-      Note that if your boundary represents an incoming flux through
-      a vacuum (like stellar irradiation), then $\lambda \rightarrow 0$
-      and $\kappa \rightarrow 0$, leaving
-      \begin{equation}
-        F_r = -c E_r
-      \end{equation}
-      in that case.  ({\color{red} What about the ``$-$''?})
+    Note that if your boundary represents an incoming flux through
+    a vacuum (like stellar irradiation), then $\lambda \rightarrow 0$
+    and $\kappa \rightarrow 0$, leaving
+    \begin{equation}
+      F_r = -c E_r
+    \end{equation}
+    in that case.  ({\color{red} What about the ``$-$''?})
 
+  \item {\tt 104} {\em Marshak} (vacuum):
+      
+    Here, you specify the incident flux and the outside is a vacuum.
+    This differs from the Neumann condition because there is also a
+    flux coming from inside, for the net flux across the boundary is
+    different than the incident flux.
 
-    \item 104: Marshak (vacuum)
+  \item {\tt 105} {\em Sanchez-Pomraning}:
 
-      Here, you specify the
-      incident flux and the outside is a vacuum.  This differs from the
-      Neumann condition because there is also a flux coming from inside,
-      for the net flux across the boundary is different than the incident
-      flux.
-
-    \item 105: Sanchez-Pomraning (modified Marshak that works with FLD)
-
-      This is like the Marshak condition, but $\lambda = 1/3$ is assumed inside
-      the boundary (optical thickness).
+    This is a modified form of the Marshak boundary condition that works with FLD.
+    This is like the Marshak condition, but $\lambda = 1/3$ is assumed inside
+    the boundary (optical thickness).
 
   \end{itemize}
-\item[radiation.hi\_bc] \hfill \\
+  
+\item {\tt radiation.hi\_bc}
+  
   See {\tt radiation.lo\_bc}.
-\item[radiation.lo\_bcflag = 0 0 0] \hfill \\
+
+\item {\tt radiation.lo\_bcflag = 0 0 0}
+  
   If it is 0, {\tt bcval} is used for that dimension, otherwise
   subroutine {\tt rbndry} in {\tt RadBndry\_1d.f90} is called to set
   boundary conditions.
-\item[radiation.hi\_bcflag = 0 0 0] \hfill \\
+
+\item {\tt radiation.hi\_bcflag = 0 0 0}
+  
   See {\tt radiation.lo\_bcflag}
-\item[radiation.lo\_bcval = 0.0 0.0 0.0] \hfill \\
-  This parameter is interpreted differently depending on the boundary
-  condition:
+
+\item {\tt radiation.lo\_bcval = 0.0 0.0 0.0}
+  
+  The actual value to impose for the boundary condition type set by
+  {\tt radiation.lo\_bc}.  This parameter is interpreted differently
+  depending on the boundary condition:
   \begin{itemize}
     \item Dirchlet: Dirichlet value of rad energy density
     \item Neumann:  inward flux of rad energy
     \item Marshak:  incident flux
     \item Sanchez-Pomraning: incident flux
   \end{itemize}
-\item[radiation.hi\_bcval = 0.0 0.0 0.0] \hfill \\
+
+\item {\tt radiation.hi\_bcval = 0.0 0.0 0.0}
+  
   See {\tt radiation.lo\_bcval}
-\end{description}
+\end{itemize}
+
 
 \subsection{Convergence}
 
