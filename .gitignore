@@ -1,0 +1,17 @@
+
+
+*.gnu
+grdlog
+
+*~
+*.ex
+
+chk*
+plt*
+
+extern.f90
+buildInfo.cpp
+
+Exec/*/d/
+Exec/*/f/
+Exec/*/o/
