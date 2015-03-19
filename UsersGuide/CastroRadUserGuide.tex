@@ -349,7 +349,28 @@ on the right-hand side of the equal sign.
 %   coefficients live on cell surfaces.  Thus averaging .....
 \end{itemize}
 
-
+Note the behavior of the radiative flux in the optically thin and
+optically thick limits.  The flux limiter, $\lambda = \lambda(R)$,
+where
+\begin{equation}
+  R = \frac{|\nabla E_r^{(0)}|}{\chi_R E_r^{(0)}}
+\end{equation}
+Regardless of the limiter chosen, when we are optically thick,
+$\chi_R \rightarrow \infty$, $R \rightarrow 0$, and $\lambda \rightarrow 1/3$.
+The radiative flux then becomes
+\begin{equation}
+  F_r^{(0)} = -\frac{c\lambda}{\chi_R} \nabla E_r^{(0)} \rightarrow
+  \frac{1}{3} \frac{c}{\chi_R} \nabla E_r^{(0)}
+\end{equation}
+And when we are optically thin, $\chi_R \rightarrow 0$, $R \rightarrow \infty$,
+and $\lambda \rightarrow 1/R = \chi_R E_r^{(0)}/{|\nabla E_r^{0}|}$, and
+the radiative flux then becomes
+\begin{equation}
+  F_r^{(0)} = -\frac{c\lambda}{\chi_R} \nabla E_r^{(0)} \rightarrow
+  -\frac{c}{\chi_R}\frac{\chi_R E_r^{(0)}}{|\nabla E_r^{0}|}
+    \nabla E_r^{(0)} = -c E_r^{0}
+\end{equation}
+See Krumholz et al.\ 2007 for some discussion on this.
 \subsection{Boundary Conditions}
 
 \castro\ needs to know about the boundary conditions for both
