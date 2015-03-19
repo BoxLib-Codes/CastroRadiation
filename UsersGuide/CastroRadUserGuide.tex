@@ -312,6 +312,8 @@ on the right-hand side of the equal sign.
 
 \subsection{Flux Limiter and Closure}
 
+\label{sec:fluxlimiter}
+
 \begin{itemize}
 
 \item {\tt radiation.limiter = 2}
@@ -429,12 +431,11 @@ equation. They do not affect hydrodynamic boundaries.
     where $\lambda$ is the flux limiter.
 
     Note that if your boundary represents an incoming flux through
-    a vacuum (like stellar irradiation), then $\lambda \rightarrow 0$
-    and $\kappa \rightarrow 0$, leaving
+    a vacuum (like stellar irradiation), then $\kappa \rightarrow 0$, leaving
     \begin{equation}
       F_r = -c E_r
     \end{equation}
-    in that case.  ({\color{red} What about the ``$-$''?})
+    (see \S~\ref{sec:fluxlimiter}) in that case.  
 
   \item {\tt 104} {\em Marshak} (vacuum):
       
