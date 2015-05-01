@@ -300,13 +300,29 @@ on the right-hand side of the equal sign.
   
   Verbosity
 
-\item {\tt radiation.Test\_Type\_lambda = 0}
+\item {\tt radiation.plot\_lambda = 0}
   
-  The gray solver only.  If {\tt 1}, save flux limiter.
+  If {\tt 1}, save flux limiter in plotfiles.
 
-\item {\tt radiation.Test\_Type\_Flux = 0}
+\item {\tt radiation.plot\_flux = 0}
   
-  If {\tt 1}, save the total radiation flux.
+  If {\tt 1}, save radiation flux in plotfiles.
+
+\item {\tt radiation.plot_lab_flux = 0}
+
+  For multi-group and comoving gray solvers, this determines the frame
+  of the flux in plotfiles.  This flag has no effect if {\tt
+    radiation.plot_flux} is {\tt 0} or the mixed frame gray solver is
+  used. 
+
+\item {\tt radiation.plot\_kappa_p = 0}
+
+  If {\tt 1}, save Planck mean opacity in plotfiles.
+
+\item {\tt radiation.plot\_kappa_r = 0}
+
+  If {\tt 1}, save Rosseland mean opacity in plotfiles.
+
 \end{itemize}
 
 
