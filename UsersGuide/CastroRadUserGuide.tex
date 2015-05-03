@@ -304,17 +304,6 @@ on the right-hand side of the equal sign.
   
   If {\tt 1}, save flux limiter in plotfiles.
 
-\item {\tt radiation.plot\_flux = 0}
-  
-  If {\tt 1}, save radiation flux in plotfiles.
-
-\item {\tt radiation.plot\_lab\_flux = 0}
-
-  For multi-group and comoving gray solvers, this determines the frame
-  of the flux in plotfiles.  This flag has no effect if {\tt
-    radiation.plot\_flux} is {\tt 0} or the mixed frame gray solver is
-  used. 
-
 \item {\tt radiation.plot\_kappa\_p = 0}
 
   If {\tt 1}, save Planck mean opacity in plotfiles.
@@ -322,6 +311,19 @@ on the right-hand side of the equal sign.
 \item {\tt radiation.plot\_kappa\_r = 0}
 
   If {\tt 1}, save Rosseland mean opacity in plotfiles.
+
+\item {\tt radiation.plot\_lab\_Er = 0}
+  
+  If {\tt 1}, save lab frame radiation energy density in plotfiles.
+  This flag is ignored when the mixed-frame gray solver is used.
+
+\item {\tt radiation.plot\_com\_flux = 0}
+  
+  If {\tt 1}, save comoving frame radiation flux in plotfiles.
+
+\item {\tt radiation.plot\_lab\_flux = 0}
+
+  If {\tt 1}, save lab frame radiation flux in plotfiles.
 
 \end{itemize}
 
