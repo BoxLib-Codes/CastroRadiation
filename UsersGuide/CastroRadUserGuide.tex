@@ -39,17 +39,18 @@ seriers of \castro\ papers and the \castro\ User's Guide.
 
 \subsection{Getting the Code}
 
-The \castro\ radiation solver is a module for the \castro\ hydrodynamics code,
-and both of these depend on the \boxlib\ library.  These pieces are
-distributed via separate git repositories.  To get all the required code,
-do the following:
+The \castro\ radiation solver is a module for the
+\castro\ hydrodynamics code, and both of these depend on the
+\boxlib\ library.  These pieces are distributed via separate git
+repositories on the BoxLib-Codes github page.  To get all the required
+code, do the following:
 
 \begin{itemize}
 
 \item \boxlib: \boxlib\ is distributed via git.  You can download it
   by typing:
 \begin{verbatim}
-git clone https://ccse.lbl.gov/pub/Downloads/BoxLib.git
+git clone https://github.com/BoxLib-Codes/BoxLib.git
 \end{verbatim}
 and update it regularly by typing {\tt git pull} in the {\tt BoxLib/}
 directory.
@@ -78,26 +79,36 @@ machine.
 
 \subsection{Building the Code}
 
-You need to modify:
+You need to modify/set the following variables:
 \begin{itemize}
-\item the variable {\tt BOXLIB\_HOME} in the file
-  {\tt\seqsplit{Castro/Exec/Make.Castro}} to the
-  directory for BoxLib (e.g., {\tt\seqsplit{/home/J.Doe/BoxLib}})
-\item the variable {\tt CASTRO\_DIR} in the file
-  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}} to
-  the Castro directory
-  (e.g., {\tt\seqsplit{/home/J.Doe/Castro}})
-\item the variable {\tt HYPRE\_DIR} in the file
-  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}} to
-  the directory for Hypre (e.g., {\tt\seqsplit{/home/J.Doe/hypre}})
-  if you build with {\tt USE\_OMP=FALSE}
-\item the variable {\tt HYPRE\_OMP\_DIR} in the file
-  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}} to
-  the directory for openmp enabled Hypre (e.g., {\tt\seqsplit{/home/J.Doe/hypre-omp}})
-  if you build with {\tt USE\_OMP=TRUE}
-\end{itemize}
-or you can set them as environment variables of your shell.  \\
+\item The environment variable {\tt BOXLIB\_HOME} should point to the
+  {\tt BoxLib/} directory (e.g., {\tt\seqsplit{/home/J.Doe/BoxLib}}).
+  
+\item the environment variable {\tt CASTRO\_DIR} should
+  point to the {\tt Castro/} directory (alternately,
+  you can set it directly in the file
+  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}})
 
+\item the environment variable {\tt HYPRE\_DIR} should
+  point to the location of your Hypre installation
+  (e.g., {\tt\seqsplit{/home/J.Doe/hypre}}) or
+  can be set directly in 
+  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}}.
+  This applies is you build with {\tt USE\_OMP=FALSE}
+
+\item the variable {\tt HYPRE\_OMP\_DIR} should be set (either as an
+  environment variable or in
+  {\tt\seqsplit{CastroRadiation/Exec/Make.Castro}}) to the directory
+  for openmp enabled Hypre (e.g.,
+  {\tt\seqsplit{/home/J.Doe/hypre-omp}}) if you build with {\tt
+    USE\_OMP=TRUE}
+
+\item for a standard installation of MPI, you can rely on the compiler
+  wrappers (e.g., {\tt mpif90}, {\tt mpic++}) to compile the code
+  with knowledge of the library locations.  To instruct \boxlib\
+  to use these set the environment variable {\tt BOXLIB\_USE\_MPI\_WRAPPERS=1}
+  
+\end{itemize}
 
 Now go to a ``run'' directory, say
 {\tt\seqsplit{CastroRadiation/Exec/RadThermalWave}},
