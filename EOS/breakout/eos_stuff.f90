@@ -1,54 +1,24 @@
-! This is a constant gamma equation of state, using an ideal gas.
-!
-! We compute the mean molecular weight, mu, based on the mass fractions
-! of the different species.
-!
-!   NOTE: in the helmholtz EOS, we use Abar, which is the weighted
-!   ion mass.  Abar does not include any free electron contribution.
-!
-! There are 2 ways to compute mu, depending on whether the gas is
-! completely ionized or not.
-!
-! For a neutral gas, the mean molecular weight is:
-!
-!   1/mu = sum_k { X_k / A_k }
-!
-! For a completely ionized gas, the mean molecular weight is:
-!
-!   1/mu = sum_k { (1 + Z_k) X_k / A_k }
-!
-! The ratio of specific heats (gamma) is allowed to vary.  NOTE: the
-! expression for entropy is only valid for an ideal MONATOMIC gas
-! (gamma = 5/3).  
 
-module eos_module
+module actual_eos_module
 
   use bl_types
-  use bl_space
   use bl_error_module
   use bl_constants_module
-  use network, only: nspec, aion, zion
   use eos_type_module
   use eos_data_module
 
   implicit none
 
-  double precision, save, public  :: gamma_const
-  logical         , save, public  :: assume_neutral
-
-  public eos_init, eos
+  character (len=64) :: eos_name = "gamma_law"  
+  double precision, save :: gamma_const
 
 contains
 
-  ! EOS initialization routine
-  subroutine eos_init(small_temp, small_dens)
+  subroutine actual_eos_init
 
-    use extern_probin_module, only: eos_gamma, eos_assume_neutral
+    use extern_probin_module, only: eos_gamma
 
     implicit none
- 
-    double precision, intent(in), optional :: small_temp
-    double precision, intent(in), optional :: small_dens
  
     ! constant ratio of specific heats
     if (eos_gamma .gt. 0.d0) then
@@ -57,223 +27,112 @@ contains
        gamma_const = FIVE3RD
     end if
  
-    ! Small temperature and density parameters
-
-    smallt = ZERO
-
-    if (present(small_temp)) smallt = small_temp
-
-    smalld = ZERO
-
-    if (present(small_dens)) smalld = small_dens
-
-    assume_neutral = eos_assume_neutral
-
-    initialized = .true.
- 
-  end subroutine eos_init
+  end subroutine actual_eos_init
 
 
+  subroutine actual_eos(input, state)
 
-  !---------------------------------------------------------------------------
-  ! The main interface
-  !---------------------------------------------------------------------------
-  subroutine eos(input, state, do_eos_diag, pt_index)
-
-    use fundamental_constants_module, only: k_B, n_A, hbar
+    use fundamental_constants_module, only: k_B, n_A
 
     implicit none
 
-    integer,           intent(in   ) :: input
-    type (eos_t),      intent(inout) :: state
-    logical, optional, intent(in   ) :: do_eos_diag
-    integer, optional, intent(in   ) :: pt_index(:)
+    integer,             intent(in   ) :: input
+    type (eos_t_vector), intent(inout) :: state
 
-    ! Local variables
-    double precision :: ymass(nspec)
-    double precision :: mu
-    double precision :: dmudX, sum_y
-    double precision :: dens, temp
+    double precision, parameter :: R = k_B*n_A
 
-    logical :: eos_diag
+    integer :: j
+    double precision :: poverrho
 
-    ! Get the mass of a nucleon from Avogadro's number.
-    double precision, parameter :: m_nucleon = ONE / n_A
-
-    integer :: k, n
-
-    ! general sanity checks
-    if (.not. initialized) call bl_error('EOS: not initialized')
-
-    eos_diag = .false.
-
-    if (present(do_eos_diag)) eos_diag = do_eos_diag
-
-    ! Get abar, zbar, mu.
-
-    call composition(state, assume_neutral)
-
-    ! xxxxx hack!
-    state % mu = 1.d0 / state % aux(2)
-
-    !-------------------------------------------------------------------------
-    ! For all EOS input modes EXCEPT eos_input_rt, first compute dens
-    ! and temp as needed from the inputs.
-    !-------------------------------------------------------------------------
+    ! xxxxxxx hack!
+    ! The only difference between this EOS and gamma-law
+    do j = 1, state % N
+       state % mu = one / state % aux(j,2)
+    end do
 
     select case (input)
 
     case (eos_input_rt)
 
        ! dens, temp and xmass are inputs
-
-       ! We don't need to do anything here
-       temp = state % T
-       dens = state % rho
-
+       do j = 1, state % N
+          state % cv(j) = R / (state % mu(j) * (gamma_const-ONE)) 
+          state % e(j) = state % cv(j) * state % T(j)
+          state % p(j) = (gamma_const-ONE) * state % rho(j) * state % e(j)
+          state % gam1(j) = gamma_const
+       end do
 
     case (eos_input_rh)
 
        ! dens, enthalpy, and xmass are inputs
 
-       ! Solve for the temperature:
-       ! h = e + p/rho = (p/rho)*[1 + 1/(gamma-1)] = (p/rho)*gamma/(gamma-1)
-       dens = state % rho
-       temp = (state % h * state % mu * m_nucleon / k_B)*(gamma_const - ONE)/gamma_const
-
+       call bl_error('EOS: eos_input_rh is not supported in this EOS.')
 
     case (eos_input_tp)
 
        ! temp, pres, and xmass are inputs
-          
-       ! Solve for the density:
-       ! p = rho k T / (mu m_nucleon)
-       dens = state % p * state % mu * m_nucleon / (k_B * state % T)
-       temp = state % T
 
-
+       call bl_error('EOS: eos_input_tp is not supported in this EOS.')
+       
     case (eos_input_rp)
 
        ! dens, pres, and xmass are inputs
 
-       ! Solve for the temperature:
-       ! p = rho k T / (mu m_nucleon)
-       dens = state % rho
-       temp = state % p * state % mu * m_nucleon / (k_B * state % rho)
-
+       do j = 1, state % N
+          poverrho = state % p(j) / state % rho(j)
+          state % T(j) = poverrho * state % mu(j) * (ONE/R)
+          state % e(j) = poverrho * (ONE/(gamma_const-ONE))
+          state % gam1(j) = gamma_const
+       end do
 
     case (eos_input_re)
 
        ! dens, energy, and xmass are inputs
 
-       ! Solve for the temperature
-       ! e = k T / [(mu m_nucleon)*(gamma-1)]
-       dens = state % rho
-       temp = state % e * state % mu * m_nucleon * (gamma_const-ONE) / k_B
+       do j = 1, state % N
+          poverrho = (gamma_const - ONE) * state % e(j)
 
+          state % p(j) = poverrho * state % rho(j)
+          state % T(j) = poverrho * state % mu(j) * (ONE/R)
+          state % gam1(j) = gamma_const
+          
+          ! sound speed
+          state % cs(j) = sqrt(gamma_const * poverrho)
+
+          state % dpdr_e(j) = poverrho
+          state % dpde(j) = (gamma_const-ONE) * state % rho(j)
+
+          ! Try to avoid the expensive log function.  Since we don't need entropy 
+          ! in hydro solver, set it to an invalid but "nice" value for the plotfile.
+          state % s(j) = ONE  
+       end do
 
     case (eos_input_ps)
-       
+
        ! pressure entropy, and xmass are inputs
 
-       ! Solve for the temperature
-       ! Invert Sackur-Tetrode eqn (below) using 
-       ! rho = p mu m_nucleon / (k T)
-       temp = state % p**(TWO/FIVE) * &
-            ( TWO*M_PI*hbar*hbar/(state % mu*m_nucleon) )**(THREE/FIVE) * &
-            dexp(TWO*state % mu*m_nucleon*state % s/(FIVE*k_B) - ONE) / k_B
-
-       ! Solve for the density
-       ! rho = p mu m_nucleon / (k T)
-       dens = state % p * state % mu * m_nucleon / (k_B * temp)
-
-
-
+       call bl_error('EOS: eos_input_ps is not supported in this EOS.')
+       
     case (eos_input_ph)
 
        ! pressure, enthalpy and xmass are inputs
 
-       ! Solve for temperature and density
-       dens = state % p / state % h * gamma_const / (gamma_const - ONE)
-       temp = state % p * state % mu * m_nucleon / (k_B * dens)
-
-
-
+       call bl_error('EOS: eos_input_ph is not supported in this EOS.')
+       
     case (eos_input_th)
 
        ! temperature, enthalpy and xmass are inputs
 
-       ! Solve for density
-       dens = state % p * state % mu * m_nucleon / (k_B * state % T)
-       temp = state % T
-
-
+       ! This system is underconstrained.
+       
+       call bl_error('EOS: eos_input_th is not a valid input for the gamma law EOS.')
 
     case default
-
+       
        call bl_error('EOS: invalid input.')
-
+       
     end select
+    
+  end subroutine actual_eos
 
-    !-------------------------------------------------------------------------
-    ! Now we have the density and temperature (and mass fractions /
-    ! mu), regardless of the inputs.
-    !-------------------------------------------------------------------------
-
-    state % T   = temp
-    state % rho = dens
-
-    ! Compute the pressure simply from the ideal gas law, and the
-    ! specific internal energy using the gamma-law EOS relation.
-    state % p = dens*k_B*temp/(state % mu*m_nucleon)
-    state % e = state % p/(gamma_const - ONE)/dens
-
-    ! enthalpy is h = e + p/rho
-    state % h = state % e + state % p / dens
-
-    ! entropy (per gram) of an ideal monoatomic gas (the Sackur-Tetrode equation)
-    ! NOTE: this expression is only valid for gamma = 5/3.
-    state % s = (k_B/(state % mu*m_nucleon))*(2.5_dp_t + &
-         log( ( (state % mu*m_nucleon)**2.5/dens )*(k_B*temp)**1.5_dp_t / (TWO*M_PI*hbar*hbar)**1.5_dp_t ) )
-
-    ! Compute the thermodynamic derivatives and specific heats 
-    state % dpdT = state % p / temp
-    state % dpdr = state % p / dens
-    state % dedT = state % e / temp
-    state % dedr = ZERO
-    state % dsdT = ZERO
-    state % dsdr = ZERO
-    state % dhdT = state % dedT + state % dpdT / dens
-    state % dhdr = state % dedr + (gamma_const - ONE) * state % p / dens**2
-
-    state % cv = state % dedT
-    state % cp = gamma_const * state % cv
-
-    state % gam1 = gamma_const
-
-    state % dpdr_e = state % dpdr - state % dpdT * state % dedr / state % dedT
-    state % dpde   = state % dpdT / state % dedT
-
- 
-    ! Get dpdX, dedX, dhdX.
-
-    state % dpdA = - state % p / state % abar
-    state % dedA = - state % e / state % abar
-
-    if (assume_neutral) then
-      state % dpdZ = ZERO
-      state % dedZ = ZERO
-    else
-      state % dpdZ = state % p / (ONE + state % zbar)
-      state % dedZ = state % e / (ONE + state % zbar)
-    endif
-
-    call composition_derivatives(state, assume_neutral)
-
-    ! sound speed
-    state % cs = sqrt(gamma_const * state % p / dens)
-
-    return
-  end subroutine eos
-
-end module eos_module
+end module actual_eos_module
