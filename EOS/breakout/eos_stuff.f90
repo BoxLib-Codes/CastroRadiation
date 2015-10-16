@@ -1,4 +1,3 @@
-
 module actual_eos_module
 
   use bl_types
@@ -9,7 +8,8 @@ module actual_eos_module
 
   implicit none
 
-  character (len=64) :: eos_name = "gamma_law"  
+  character (len=64) :: eos_name = "break"  
+  
   double precision, save :: gamma_const
 
 contains
@@ -26,8 +26,9 @@ contains
     else
        gamma_const = FIVE3RD
     end if
- 
+
   end subroutine actual_eos_init
+
 
 
   subroutine actual_eos(input, state)
@@ -43,6 +44,8 @@ contains
 
     integer :: j
     double precision :: poverrho
+
+    ! Calculate mu.
 
     ! xxxxxxx hack!
     ! The only difference between this EOS and gamma-law
