@@ -17,13 +17,11 @@ module actual_eos_module
   
   double precision, save :: gamma_const
 
-  logical, save :: assume_neutral
-
 contains
 
   subroutine actual_eos_init
 
-    use extern_probin_module, only: eos_gamma, eos_assume_neutral
+    use extern_probin_module, only: eos_gamma
 
     implicit none
  
@@ -33,8 +31,6 @@ contains
     else
        gamma_const = FIVE3RD
     end if
-
-    assume_neutral = eos_assume_neutral
 
   end subroutine actual_eos_init
 
