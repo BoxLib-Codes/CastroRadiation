@@ -1,3 +1,8 @@
+! This is a constant gamma equation of state, using an ideal gas.
+!
+! This a simplified version of the more general eos_gamma_general.
+!
+
 module actual_eos_module
 
   use bl_types
@@ -8,15 +13,17 @@ module actual_eos_module
 
   implicit none
 
-  character (len=64) :: eos_name = "break"  
+  character (len=64) :: eos_name = "gamma_law"  
   
   double precision, save :: gamma_const
+
+  logical, save :: assume_neutral
 
 contains
 
   subroutine actual_eos_init
 
-    use extern_probin_module, only: eos_gamma
+    use extern_probin_module, only: eos_gamma, eos_assume_neutral
 
     implicit none
  
@@ -26,6 +33,8 @@ contains
     else
        gamma_const = FIVE3RD
     end if
+
+    assume_neutral = eos_assume_neutral
 
   end subroutine actual_eos_init
 
@@ -37,78 +46,69 @@ contains
 
     implicit none
 
-    integer,             intent(in   ) :: input
-    type (eos_t_vector), intent(inout) :: state
+    integer,      intent(in   ) :: input
+    type (eos_t), intent(inout) :: state
 
     double precision, parameter :: R = k_B*n_A
 
-    integer :: j
     double precision :: poverrho
 
     ! Calculate mu.
 
     ! xxxxxxx hack!
     ! The only difference between this EOS and gamma-law
-    do j = 1, state % N
-       state % mu = one / state % aux(j,2)
-    end do
-
+    state % mu = one / state % aux(2)
+    
     select case (input)
 
     case (eos_input_rt)
 
        ! dens, temp and xmass are inputs
-       do j = 1, state % N
-          state % cv(j) = R / (state % mu(j) * (gamma_const-ONE)) 
-          state % e(j) = state % cv(j) * state % T(j)
-          state % p(j) = (gamma_const-ONE) * state % rho(j) * state % e(j)
-          state % gam1(j) = gamma_const
-       end do
+       state % cv = R / (state % mu * (gamma_const-ONE)) 
+       state % e = state % cv * state % T
+       state % p = (gamma_const-ONE) * state % rho * state % e
+       state % gam1 = gamma_const
 
     case (eos_input_rh)
 
        ! dens, enthalpy, and xmass are inputs
 
-       call bl_error('EOS: eos_input_rh is not supported in this EOS.')
+!       call bl_error('EOS: eos_input_rh is not supported in this EOS.')
 
     case (eos_input_tp)
 
        ! temp, pres, and xmass are inputs
 
-       call bl_error('EOS: eos_input_tp is not supported in this EOS.')
+!       call bl_error('EOS: eos_input_tp is not supported in this EOS.')
        
     case (eos_input_rp)
 
        ! dens, pres, and xmass are inputs
 
-       do j = 1, state % N
-          poverrho = state % p(j) / state % rho(j)
-          state % T(j) = poverrho * state % mu(j) * (ONE/R)
-          state % e(j) = poverrho * (ONE/(gamma_const-ONE))
-          state % gam1(j) = gamma_const
-       end do
+       poverrho = state % p / state % rho
+       state % T = poverrho * state % mu * (ONE/R)
+       state % e = poverrho * (ONE/(gamma_const-ONE))
+       state % gam1 = gamma_const
 
     case (eos_input_re)
 
        ! dens, energy, and xmass are inputs
 
-       do j = 1, state % N
-          poverrho = (gamma_const - ONE) * state % e(j)
+       poverrho = (gamma_const - ONE) * state % e
 
-          state % p(j) = poverrho * state % rho(j)
-          state % T(j) = poverrho * state % mu(j) * (ONE/R)
-          state % gam1(j) = gamma_const
-          
-          ! sound speed
-          state % cs(j) = sqrt(gamma_const * poverrho)
+       state % p = poverrho * state % rho
+       state % T = poverrho * state % mu * (ONE/R)
+       state % gam1 = gamma_const
+       
+       ! sound speed
+       state % cs = sqrt(gamma_const * poverrho)
 
-          state % dpdr_e(j) = poverrho
-          state % dpde(j) = (gamma_const-ONE) * state % rho(j)
+       state % dpdr_e = poverrho
+       state % dpde = (gamma_const-ONE) * state % rho
 
-          ! Try to avoid the expensive log function.  Since we don't need entropy 
-          ! in hydro solver, set it to an invalid but "nice" value for the plotfile.
-          state % s(j) = ONE  
-       end do
+       ! Try to avoid the expensive log function.  Since we don't need entropy 
+       ! in hydro solver, set it to an invalid but "nice" value for the plotfile.
+       state % s = ONE  
 
     case (eos_input_ps)
 
