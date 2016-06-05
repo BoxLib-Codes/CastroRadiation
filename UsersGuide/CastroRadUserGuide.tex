@@ -124,23 +124,25 @@ Then type {\tt make} to generate an executable file.
 
 \subsection{EOS}
 
-\castro\ provides several types of equation of state (EOS), including
-gamma-law and Helmholtz.  To use the gamma-law EOS, set
+\castro\ ships with a basic gamma-law equation of state, which you
+can use by setting
 \begin{verbatim}
-EOS_dir := gamma_law_general
+EOS_dir := gamma_law
 \end{verbatim}
-in the {\tt GNUmakefile}.
+in the {\tt GNUmakefile}. If you want access to a different EOS, you
+should download the Microphysics repository (details can be found in
+the main Castro user's guide). As usual, just set {\tt EOS\_dir} to
+the name of the directory with the EOS you want, and the build system
+will automatically look for it in Microphysics if it is anything other
+than {\tt gamma\_law}.
 
-The original Helmholtz EOS for stellar interiors includes a radiation
-contribution.  However, for radiation hydrodynamics calculations, the
-radition contribution should be taken out of EOS because radiation has
-been treated in other places.  To use Helmholtz EOS, do NOT set {\tt
-  EOS\_dir} to {\tt helmeos}.  Instead
-\begin{verbatim}
-EOS_dir := helmeos_without_rad
-\end{verbatim}
-should be set.  If you have your own EOS, you can put it in
-{\tt\seqsplit{CastroRadiation/EOS}}.
+One thing to note is that the Helmholtz EOS for stellar interiors normally
+includes a radiation contribution.  However, for radiation hydrodynamics
+calculations, the radition contribution should be disabled because
+radiation has been treated in other places. Consequently if you specify
+that you want that EOS using {\tt EOS\_dir = helmholtz}, the radiation
+pressure there will be disabled for radiation builds (specifically,
+if {\tt USE\_RADIATION} is defined in the Makefile).
 
 \subsubsection{EOS Parameters}
 
