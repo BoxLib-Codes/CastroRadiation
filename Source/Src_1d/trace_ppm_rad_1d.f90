@@ -90,7 +90,7 @@ contains
 
     logical :: fix_mass_flux_lo, fix_mass_flux_hi
 
-    double precision, dimension(0:ngroups-1) :: er, der, alphar, sourcer, qrtmp, hr
+    double precision, dimension(0:ngroups-1) :: er, der, alphar, sourcer, hr
     double precision, dimension(0:ngroups-1) :: lam0, lamp, lamm
 
     double precision, dimension(0:ngroups-1) :: er_ref
@@ -304,13 +304,14 @@ contains
           qxp(i,QRHO)   = rho_ref + alphap + alpham + alpha0r
           qxp(i,QU)     = u_ref + (alphap - alpham)*cc/rho
           qxp(i,QREINT) = rhoe_g_ref + (alphap + alpham)*h_g*csq + alpha0e_g
-          qxp(i,QPRES)  = p_ref + (alphap + alpham)*cgassq - sum(lamp(:)*alphar(:))
 
-          qrtmp = er_ref(:) + (alphap + alpham)*hr + alphar(:)
-          qxp(i,qrad:qradhi) = qrtmp
-
+          qxp(i,qrad:qradhi) = er_ref(:) + (alphap + alpham)*hr + alphar(:)
           qxp(i,qptot) = ptot_ref + (alphap + alpham)*csq
-          qxp(i,qreitot) = qxp(i,QREINT) + sum(qrtmp)
+
+          ! now derive the gas pressure, ptot = p + lambda E_r
+          qxp(i,QPRES)  = qxp(i,QPTOT) - sum(lamp(:)*qxp(i,qrad:qradhi))
+
+          qxp(i,qreitot) = qxp(i,QREINT) + sum(qxp(i,qrad:qradhi))
 
           ! enforce small_*
           qxp(i,QRHO) = max(small_dens,qxp(i,QRHO))
@@ -426,13 +427,14 @@ contains
           qxm(i+1,QRHO)   = rho_ref + alphap + alpham + alpha0r
           qxm(i+1,QU)     = u_ref + (alphap - alpham)*cc/rho
           qxm(i+1,QREINT) = rhoe_g_ref + (alphap + alpham)*h_g*csq + alpha0e_g
-          qxm(i+1,QPRES)  = p_ref + (alphap + alpham)*cgassq - sum(lamm(:)*alphar(:))
 
-          qrtmp = er_ref(:) + (alphap + alpham)*hr + alphar(:)
-          qxm(i+1,qrad:qradhi) = qrtmp
-
+          qxm(i+1,qrad:qradhi) = er_ref(:) + (alphap + alpham)*hr + alphar(:)
           qxm(i+1,qptot) = ptot_ref + (alphap + alpham)*csq
-          qxm(i+1,qreitot) = qxm(i+1,QREINT) + sum(qrtmp)
+
+          ! now derive the gas pressure, ptot = p + lambda E_r
+          qxm(i+1,QPRES) = qxm(i+1,QPTOT) - sum(lamm(:)*qxm(i+1,qrad:qradhi))
+
+          qxm(i+1,qreitot) = qxm(i+1,QREINT) + sum(qxm(i+1,qrad:qradhi))
 
           ! enforce small_*
           qxm(i+1,QRHO) = max(qxm(i+1,QRHO),small_dens)
