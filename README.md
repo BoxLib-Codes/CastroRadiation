@@ -1,17 +1,11 @@
 # Castro Radiation Module
 *an adaptive mesh, astrophysical radiation hydrodynamics simulation code*
 
-## Getting Started
+# NOTE: this is deprecated
 
-To build CastroRadiation, you need a copy of the BoxLib library:
-
-https://ccse.lbl.gov/BoxLib/index.html
-
-and a copy of the Castro code:
+The radiaton hydrodynamics source hosted here has been integrated directly
+into the main Castro repo:
 
 https://github.com/BoxLib-Codes/Castro
 
-There is a User's Guide in `CastroRadiation/UsersGuide/` (type `make`
-to build from LaTeX source) that will guide you through running your
-first problem.
-
+You no longer need to clone this repo separately.
